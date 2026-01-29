@@ -17,18 +17,24 @@ public class UserApiController {
 
     private final UserService userService;
 
-    // 1. 회원가입 (기존과 동일)
+    // 1. 회원가입
     @PostMapping("/signup")
     public ResponseEntity<String> signUp(@RequestBody User user) {
         try {
+            if (user.getLatitude() != null && user.getLongitude() != null) {
+                boolean isVerified = userService.verifyLocationWithKakao(
+                        user.getLatitude(), user.getLongitude(), user.getAddress()
+                );
+                user.setLocationVerified(isVerified);
+            }
             userService.join(user);
-            return ResponseEntity.ok("회원가입 및 동네 설정 완료!");
+            return ResponseEntity.ok("회원가입 완료! 펫 등록 페이지로 이동합니다.");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("가입 실패: " + e.getMessage());
         }
     }
 
-    // 2. 로그인 (성공 시 유저의 동네 정보 포함 반환)
+    // 2. 로그인
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginData) {
         try {
@@ -39,12 +45,14 @@ public class UserApiController {
         }
     }
 
-    // 3. 당근마켓식 '우리 동네' 사용자 목록 가져오기
-    // 실시간 좌표가 아니라, 가입 시 저장된 address(동네)가 같은 유저들을 찾습니다.
+    // 3. 이웃 목록 조회 (수정 완료)
     @GetMapping("/neighbor-list")
-    public ResponseEntity<List<User>> getNeighbors(@RequestParam String address) {
-        // 주소에서 '역삼동' 같은 동 단위만 추출해서 검색하는 로직이 서비스에 필요합니다.
-        List<User> neighbors = userService.getUsersByAddress(address);
+    public ResponseEntity<List<User>> getNeighbors(
+            @RequestParam(name = "address") String address,
+            @RequestParam(name = "petType") String petType) {
+
+        // 주소와 반려동물 종류가 일치하는 이웃 목록 조회
+        List<User> neighbors = userService.getUsersByAddressAndPetType(address, petType);
         return ResponseEntity.ok(neighbors);
     }
 }
