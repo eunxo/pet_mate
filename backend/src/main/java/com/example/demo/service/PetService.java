@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.controller.PetDto;
 import com.example.demo.entity.Pet;
 import com.example.demo.entity.User;
 import com.example.demo.repository.PetRepository;
@@ -29,19 +30,19 @@ public class PetService {
      * 반려동물 등록 실행
      */
     @Transactional
-    public void registerPet(Map<String, Object> payload) {
-        Long userId = Long.valueOf(payload.get("userId").toString());
+    public void registerPet(Long userId, PetDto petDto) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
 
         Pet pet = new Pet();
-        pet.setUser(user); // ERD에 따른 유저와 펫의 1:N 관계 설정
-        pet.setType(payload.get("type").toString());
-        pet.setName(payload.get("name").toString());
-        pet.setRegistrationNo(payload.get("registrationNo").toString());
-        pet.setTags(payload.get("tags").toString());
+        pet.setName(petDto.getName());
+        pet.setType(petDto.getType());
+        pet.setRegistrationNo(petDto.getRegistrationNo());
+        pet.setTags(petDto.getTags());
+        pet.setPhotoUrl(petDto.getPhotoUrl());
+        pet.setUser(user); // 연관관계 설정
 
-        petRepository.save(pet); //
+        petRepository.save(pet);
     }
 
     /**
