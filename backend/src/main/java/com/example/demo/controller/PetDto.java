@@ -11,4 +11,5 @@ public class PetDto {
     private String registrationNo; // 등록 번호
     private String tags;           // 성향 태그
     private String photoUrl;       // 사진 경로
+    private String description;    // 상세 설명 (사료, 배변 습관 등) - 추가
 }

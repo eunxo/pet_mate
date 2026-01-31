@@ -15,7 +15,7 @@ public class Pet {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     @com.fasterxml.jackson.annotation.JsonIgnore
     private User user; // 주인 ID (FK)
 
@@ -24,4 +24,7 @@ public class Pet {
     private String registrationNo;
     private String tags; // 성향 태그
     private String photoUrl;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
 }

@@ -13,13 +13,14 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class PetService {
 
-    private final PetRepository petRepository; //
+    private final PetRepository petRepository;
     private final UserRepository userRepository;
 
     // 1. 누락되었던 petServiceKey 선언
@@ -32,17 +33,24 @@ public class PetService {
     @Transactional
     public void registerPet(Long userId, PetDto petDto) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
         Pet pet = new Pet();
-        pet.setName(petDto.getName());
+        pet.setUser(user);
+
         pet.setType(petDto.getType());
+        pet.setName(petDto.getName());
         pet.setRegistrationNo(petDto.getRegistrationNo());
         pet.setTags(petDto.getTags());
-        pet.setPhotoUrl(petDto.getPhotoUrl());
-        pet.setUser(user); // 연관관계 설정
+        pet.setDescription(petDto.getDescription());
 
         petRepository.save(pet);
+
+        // 등록번호가 있는 경우 유저의 펫 인증 상태를 true로 변경할 수도 있습니다
+        if (pet.getRegistrationNo() != null && !pet.getRegistrationNo().isEmpty()) {
+            user.setPetVerified(true);
+            userRepository.save(user);
+        }
     }
 
     /**
@@ -76,5 +84,8 @@ public class PetService {
             e.printStackTrace();
             return false;
         }
+    }
+    public List<Pet> getMyPetsByUserId(Long userId) {
+        return petRepository.findByUserId(userId);
     }
 }

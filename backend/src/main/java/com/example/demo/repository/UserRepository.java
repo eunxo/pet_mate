@@ -1,6 +1,7 @@
 package com.example.demo.repository;
 
 import com.example.demo.entity.User;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,4 +21,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // 2. 주소와 펫 타입을 동시에 검색하기 위한 메서드 (@Query 사용)
     @Query("SELECT DISTINCT u FROM User u JOIN u.pets p WHERE u.address LIKE %:address% AND p.type = :petType")
     List<User> findUsersByAddressAndPetType(@Param("address") String address, @Param("petType") String petType);
+    @EntityGraph(attributePaths = {"pets"})
+    Optional<User> findWithPetsById(Long id);
 }

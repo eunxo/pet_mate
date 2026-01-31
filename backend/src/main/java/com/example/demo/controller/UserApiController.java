@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.entity.User;
+import com.example.demo.repository.UserRepository;
 import com.example.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import java.util.Map;
 public class UserApiController {
 
     private final UserService userService;
+    private final UserRepository userRepository;
 
     // 1. 회원가입
     @PostMapping("/signup")
@@ -54,5 +56,12 @@ public class UserApiController {
         // 주소와 반려동물 종류가 일치하는 이웃 목록 조회
         List<User> neighbors = userService.getUsersByAddressAndPetType(address, petType);
         return ResponseEntity.ok(neighbors);
+    }
+    // 4. ID로 최신 유저정보 가져옴
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserInfo(@PathVariable(name = "id") Long id) {
+        return userRepository.findWithPetsById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }
