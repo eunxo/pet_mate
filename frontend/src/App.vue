@@ -1,9 +1,10 @@
 <template>
   <header>
     <nav class="navbar">
-      <div class="logo">
-        <router-link to="/">🐾 Pet Mate</router-link>
+      <div class="logo-container">
+        <router-link to="/" class="logo-text">멍냥모아</router-link>
       </div>
+
       <div class="nav-links">
         <router-link to="/">홈</router-link>
         
@@ -31,55 +32,76 @@ const router = useRouter()
 const route = useRoute()
 const isLoggedIn = ref(false)
 
-// 로그인 상태 체크 함수
 const checkLoginStatus = () => {
   isLoggedIn.value = !!localStorage.getItem('user')
 }
 
-// 페이지가 로드될 때와 경로가 바뀔 때마다 로그인 상태 확인
 onMounted(checkLoginStatus)
 watch(() => route.path, checkLoginStatus)
 
-// 로그아웃 처리 함수
 const handleLogout = () => {
   if (confirm("로그아웃 하시겠습니까?")) {
-    localStorage.removeItem('user') // 저장된 유저 정보 삭제
+    localStorage.removeItem('user')
     isLoggedIn.value = false
     alert("로그아웃 되었습니다.")
-    router.push('/login') // 로그인 페이지로 이동
+    router.push('/login')
   }
 }
 </script>
 
 <style scoped>
 .navbar {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  /* 2. 중앙 정렬을 위해 좌(1fr) - 중(auto) - 우(1fr) 구조 유지 */
+  grid-template-columns: 1fr auto 1fr; 
   align-items: center;
   padding: 15px 50px;
   background-color: white;
   border-bottom: 1px solid #eee;
 }
-.logo a {
-  font-size: 24px;
-  font-weight: bold;
-  color: #4AAE9B;
-  text-decoration: none;
+
+/* 3. 로고 컨테이너가 중앙 열(2번째 열)에 오도록 설정 */
+.logo-container {
+  grid-column: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
+
+.logo-text {
+  color: #629f62; 
+  font-family: 'Arial Round', 'Nanum Gothic', sans-serif;
+  font-weight: 900;
+  font-size: 28px;
+  letter-spacing: -0.5px;
+  text-decoration: none;
+  display: inline-block;
+  transform: scaleY(1.1);
+}
+
+.logo-text:hover {
+  color: #4e824e;
+}
+
 .nav-links {
+  grid-column: 3;
+  justify-self: end;
   display: flex;
   gap: 20px;
 }
+
 .nav-links a {
   text-decoration: none;
   color: #333;
   font-weight: 500;
   cursor: pointer;
 }
+
 .nav-links a:hover {
   color: #4AAE9B;
 }
+
 .logout-link {
-  color: #333 !important; /* 로그아웃은 빨간색으로 강조 */
+  color: #333 !important;
 }
 </style>
