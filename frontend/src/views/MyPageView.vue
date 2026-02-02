@@ -10,7 +10,7 @@
             </div>
             <div class="user-text-details">
               <h3>{{ currentUser?.nickname || '사용자' }}님, 반가워요!</h3>
-              <span class="verify-badge">● 지역인증 완료</span>
+              <span class="verify-badge">● {{ currentUser?.isLocationVerified ? '지역 인증 완료' : '지역 인증 필요' }}</span>
             </div>
           </div>
           <div class="user-address-box">
