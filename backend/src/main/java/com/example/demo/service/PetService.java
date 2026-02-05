@@ -10,11 +10,15 @@ import org.springframework.beans.factory.annotation.Value; // @Value를 위해 �
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -30,8 +34,12 @@ public class PetService {
     /**
      * 반려동물 등록 실행
      */
+
+    // 사진이 저장될 서버의 실제 경로 (예: C:/uploads/pets/ 또는 /home/ubuntu/uploads/)
+    private final String uploadPath = "C:/Web/uploads/pets/";
+
     @Transactional
-    public void registerPet(Long userId, PetDto petDto) {
+    public void registerPet(Long userId, PetDto petDto, MultipartFile file) throws IOException {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
@@ -45,6 +53,24 @@ public class PetService {
         pet.setDescription(petDto.getDescription());
 
         petRepository.save(pet);
+
+        //사진 파일 처리 로직
+        if (file != null && !file.isEmpty()) {
+            // 1. 파일명 중복 방지를 위해 UUID 생성
+            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            File saveFile = new File(uploadPath, fileName);
+
+            // 2. 해당 폴더가 없으면 생성
+            if (!saveFile.getParentFile().exists()) {
+                saveFile.getParentFile().mkdirs();
+            }
+
+            // 3. 서버 하드디스크에 파일 저장
+            file.transferTo(saveFile);
+
+            // 4. DB에는 접근 가능한 URL 경로를 저장 (예: /uploads/pets/uuid_image.jpg)
+            pet.setPhotoUrl("/uploads/pets/" + fileName);
+        }
 
         // 등록번호가 있는 경우 유저의 펫 인증 상태를 true로 변경할 수도 있습니다
         if (pet.getRegistrationNo() != null && !pet.getRegistrationNo().isEmpty()) {
